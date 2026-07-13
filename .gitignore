@@ -4,9 +4,17 @@
 # Node dependencies
 node_modules/
 
-# Cordova generated directories
-platforms/
+# Cordova generated dependencies
 plugins/
+
+# Keep platforms/ tracked because native application code lives there.
+# Ignore only native build output and machine-local state.
+platforms/**/build/
+platforms/**/.gradle/
+platforms/**/local.properties
+platforms/**/*.apk
+platforms/**/*.aab
+platforms/**/*.ap_
 
 # Cordova and mobile build outputs
 www/cordova.js
@@ -25,7 +33,6 @@ local.properties
 
 # iOS build artifacts
 DerivedData/
-build/
 *.xcuserstate
 *.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/

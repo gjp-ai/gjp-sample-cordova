@@ -2,6 +2,10 @@
 
 GJP Sample Cordova project for iOS and Android.
 
+The app starts with native splash and login screens on Android and iOS. After a successful native login, the existing Cordova web application is revealed.
+
+The login service is currently a platform-local mock. Use `demo` as the username and `demo` as the password. Replace `MockLoginService` in the Android and iOS native entry points when the real service is ready.
+
 ## Prerequisites
 
 - Node.js and npm
@@ -63,9 +67,11 @@ cordova build ios
 - `config.xml` - Cordova app metadata and runtime configuration.
 - `www/` - Web application source files packaged into the Cordova app.
 - `package.json` - npm dependencies and Cordova platform metadata.
-- `platforms/` - Generated native platform projects. Recreate with `cordova prepare`.
+- `platforms/` - Tracked native platform projects containing the splash and login implementations.
 - `plugins/` - Generated Cordova plugin installation directory.
 
 ## Git Notes
 
-Generated directories such as `node_modules/`, `platforms/`, and `plugins/` are ignored. Commit the source files, `config.xml`, `package.json`, and `package-lock.json`.
+`platforms/` is intentionally committed because it contains native application code. Native build output and local IDE state inside `platforms/` remain ignored. `node_modules/` and `plugins/` are generated dependencies and are ignored.
+
+When changing the Cordova web app, run `cordova prepare` carefully: it refreshes generated web assets in `platforms/` and can overwrite platform-generated files. Review native changes after preparing the project.
