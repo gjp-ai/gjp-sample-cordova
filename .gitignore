@@ -33,6 +33,8 @@ local.properties
 
 # iOS build artifacts
 DerivedData/
+**/.swiftpm/
+**/xcuserdata/
 *.xcuserstate
 *.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
