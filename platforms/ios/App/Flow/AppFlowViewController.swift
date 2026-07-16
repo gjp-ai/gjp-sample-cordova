@@ -17,7 +17,7 @@ final class AppFlowViewController: UIViewController {
     }
 
     private func showLoginScreen() {
-        let loginViewController = LoginViewController(loginService: MockLoginService())
+        let loginViewController = LoginViewController(loginService: LoginService())
         loginViewController.onLoginSuccess = { [weak self] in
             self?.showWebApp()
         }

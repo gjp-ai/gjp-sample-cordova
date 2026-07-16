@@ -37,6 +37,14 @@ platforms/android/tools/gradle/
 platforms/android/tools/gradlew
 platforms/android/tools/gradlew.bat
 
+# Keep native API settings and mock payloads under version control.
+!platforms/android/app/src/main/assets/app-settings.json
+!platforms/android/app/src/main/assets/mock-responses/
+!platforms/android/app/src/main/assets/mock-responses/**
+!platforms/ios/App/Resources/AppSettings.json
+!platforms/ios/App/Resources/MockResponses/
+!platforms/ios/App/Resources/MockResponses/**
+
 # Cordova and mobile build outputs
 www/cordova.js
 www/cordova_plugins.js

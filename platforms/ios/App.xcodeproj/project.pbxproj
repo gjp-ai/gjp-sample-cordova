@@ -19,8 +19,20 @@
 		90CBB52C2C06968500B805A2 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CBB52B2C06968500B805A2 /* WebViewController.swift */; };
 		A10000012D10000100000001 /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000012D10000200000001 /* SplashViewController.swift */; };
 		A10000012D10000300000001 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000012D10000400000001 /* LoginViewController.swift */; };
-		A10000012D10000500000001 /* MockLoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000012D10000600000001 /* MockLoginService.swift */; };
 		A10000012D10000700000001 /* AppFlowViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000012D10000800000001 /* AppFlowViewController.swift */; };
+		B10000012D20000100000001 /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000012D20000200000001 /* LoginService.swift */; };
+		C10000012D30000100000001 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000012D30000200000001 /* AppSettings.swift */; };
+		C10000012D30000300000001 /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000012D30000400000001 /* APIRequest.swift */; };
+		C10000012D30000500000001 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000012D30000600000001 /* APIClient.swift */; };
+		C10000012D30000700000001 /* AppSettings.json in Resources */ = {isa = PBXBuildFile; fileRef = C10000012D30000800000001 /* AppSettings.json */; };
+		C10000012D30000900000001 /* LoginSuccess.json in Resources */ = {isa = PBXBuildFile; fileRef = C10000012D30000A00000001 /* LoginSuccess.json */; };
+		D10000012D40000100000001 /* LoginInvalidCredentials.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000200000001 /* LoginInvalidCredentials.json */; };
+		D10000012D40000300000001 /* LoginValidationError.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000400000001 /* LoginValidationError.json */; };
+		D10000012D40000500000001 /* LoginAccountLocked.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000600000001 /* LoginAccountLocked.json */; };
+		D10000012D40000700000001 /* LoginRateLimited.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000800000001 /* LoginRateLimited.json */; };
+		D10000012D40000900000001 /* LoginServerError.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000A00000001 /* LoginServerError.json */; };
+		D10000012D40000B00000001 /* LoginMalformed.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000C00000001 /* LoginMalformed.json */; };
+		D10000012D40000D00000001 /* LoginEmpty.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000E00000001 /* LoginEmpty.json */; };
 		90D82ABD2CF19AEA001383CF /* CordovaPlugins in Frameworks */ = {isa = PBXBuildFile; productRef = 90D82ABC2CF19AEA001383CF /* CordovaPlugins */; };
 		EDB55B7E6EF44106A6734068 /* NativeSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 628AD60BAFBB4051967C556F /* NativeSession.m */; };
 		8FC3CCDF05124BD4843A4DE4 /* SplashIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = B86C644A75B84BAD93168383 /* SplashIcon.png */; };
@@ -58,8 +70,20 @@
 		90CBB52B2C06968500B805A2 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		A10000012D10000200000001 /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		A10000012D10000400000001 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
-		A10000012D10000600000001 /* MockLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockLoginService.swift; sourceTree = "<group>"; };
 		A10000012D10000800000001 /* AppFlowViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFlowViewController.swift; sourceTree = "<group>"; };
+		B10000012D20000200000001 /* LoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginService.swift; sourceTree = "<group>"; };
+		C10000012D30000200000001 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		C10000012D30000400000001 /* APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
+		C10000012D30000600000001 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		C10000012D30000800000001 /* AppSettings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = AppSettings.json; sourceTree = "<group>"; };
+		C10000012D30000A00000001 /* LoginSuccess.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginSuccess.json; sourceTree = "<group>"; };
+		D10000012D40000200000001 /* LoginInvalidCredentials.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginInvalidCredentials.json; sourceTree = "<group>"; };
+		D10000012D40000400000001 /* LoginValidationError.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginValidationError.json; sourceTree = "<group>"; };
+		D10000012D40000600000001 /* LoginAccountLocked.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginAccountLocked.json; sourceTree = "<group>"; };
+		D10000012D40000800000001 /* LoginRateLimited.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginRateLimited.json; sourceTree = "<group>"; };
+		D10000012D40000A00000001 /* LoginServerError.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginServerError.json; sourceTree = "<group>"; };
+		D10000012D40000C00000001 /* LoginMalformed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginMalformed.json; sourceTree = "<group>"; };
+		D10000012D40000E00000001 /* LoginEmpty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginEmpty.json; sourceTree = "<group>"; };
 		90EB303B2C6DD83300CEEB2F /* build.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = build.xcconfig; path = cordova/build.xcconfig; sourceTree = SOURCE_ROOT; };
 		90EB303C2C6DD83300CEEB2F /* build-extras.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "build-extras.xcconfig"; path = "cordova/build-extras.xcconfig"; sourceTree = SOURCE_ROOT; };
 		90EB303F2C6DD87600CEEB2F /* build-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "build-debug.xcconfig"; path = "cordova/build-debug.xcconfig"; sourceTree = SOURCE_ROOT; };
@@ -88,6 +112,15 @@
 			isa = PBXGroup;
 			children = (
 				B86C644A75B84BAD93168383 /* SplashIcon.png */,
+				C10000012D30000800000001 /* AppSettings.json */,
+				C10000012D30000A00000001 /* LoginSuccess.json */,
+				D10000012D40000200000001 /* LoginInvalidCredentials.json */,
+				D10000012D40000400000001 /* LoginValidationError.json */,
+				D10000012D40000600000001 /* LoginAccountLocked.json */,
+				D10000012D40000800000001 /* LoginRateLimited.json */,
+				D10000012D40000A00000001 /* LoginServerError.json */,
+				D10000012D40000C00000001 /* LoginMalformed.json */,
+				D10000012D40000E00000001 /* LoginEmpty.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -156,7 +189,7 @@
 		A10000012D10000C00000001 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				A10000012D10000600000001 /* MockLoginService.swift */,
+				B10000012D20000200000001 /* LoginService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -167,6 +200,23 @@
 				90CBB52B2C06968500B805A2 /* WebViewController.swift */,
 			);
 			path = Web;
+			sourceTree = "<group>";
+		};
+		C10000012D30000B00000001 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				C10000012D30000200000001 /* AppSettings.swift */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		C10000012D30000C00000001 /* Network */ = {
+			isa = PBXGroup;
+			children = (
+				C10000012D30000400000001 /* APIRequest.swift */,
+				C10000012D30000600000001 /* APIClient.swift */,
+			);
+			path = Network;
 			sourceTree = "<group>";
 		};
 		90BD9B632C06907D000DEBAB /* CustomTemplate */ = {
@@ -197,6 +247,8 @@
 				A10000012D10000900000001 /* Flow */,
 				A10000012D10000A00000001 /* Splash */,
 				A10000012D10000B00000001 /* Login */,
+				C10000012D30000B00000001 /* Configuration */,
+				C10000012D30000C00000001 /* Network */,
 				A10000012D10000D00000001 /* Web */,
 				90BD9B7D2C06907E000DEBAB /* CDVLaunchScreen.storyboard */,
 				90BD9B782C06907D000DEBAB /* Main.storyboard */,
@@ -290,6 +342,15 @@
 				90BD9B7A2C06907D000DEBAB /* Base in Resources */,
 				907F98662C06BC1B00D2D242 /* config.xml in Resources */,
 				8FC3CCDF05124BD4843A4DE4 /* SplashIcon.png in Resources */,
+				C10000012D30000700000001 /* AppSettings.json in Resources */,
+				C10000012D30000900000001 /* LoginSuccess.json in Resources */,
+				D10000012D40000100000001 /* LoginInvalidCredentials.json in Resources */,
+				D10000012D40000300000001 /* LoginValidationError.json in Resources */,
+				D10000012D40000500000001 /* LoginAccountLocked.json in Resources */,
+				D10000012D40000700000001 /* LoginRateLimited.json in Resources */,
+				D10000012D40000900000001 /* LoginServerError.json in Resources */,
+				D10000012D40000B00000001 /* LoginMalformed.json in Resources */,
+				D10000012D40000D00000001 /* LoginEmpty.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,7 +364,10 @@
 				90CBB52C2C06968500B805A2 /* WebViewController.swift in Sources */,
 				A10000012D10000100000001 /* SplashViewController.swift in Sources */,
 				A10000012D10000300000001 /* LoginViewController.swift in Sources */,
-				A10000012D10000500000001 /* MockLoginService.swift in Sources */,
+				B10000012D20000100000001 /* LoginService.swift in Sources */,
+				C10000012D30000100000001 /* AppSettings.swift in Sources */,
+				C10000012D30000300000001 /* APIRequest.swift in Sources */,
+				C10000012D30000500000001 /* APIClient.swift in Sources */,
 				A10000012D10000700000001 /* AppFlowViewController.swift in Sources */,
 				90CBB5282C06968500B805A2 /* AppDelegate.swift in Sources */,
 				90CBB52A2C06968500B805A2 /* SceneDelegate.swift in Sources */,

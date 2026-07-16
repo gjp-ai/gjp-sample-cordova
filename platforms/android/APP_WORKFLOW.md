@@ -11,7 +11,7 @@ Android system launch screen
 SplashActivity + SplashView (3 seconds)
         |
         v
-LoginActivity + LoginView + MockLoginService
+LoginActivity + LoginView + LoginService
         |
         v
 WebViewActivity + Cordova web application
@@ -36,8 +36,13 @@ app/src/main/java/com/ganjianping/sample/
     │   ├── LoginView.java
     │   └── services/
     │       ├── LoginResult.java
-    │       ├── LoginService.java
-    │       └── MockLoginService.java
+    │       └── LoginService.java
+    ├── config/
+    │   └── AppSettings.java
+    ├── network/
+    │   ├── ApiClient.java
+    │   ├── ApiRequest.java
+    │   └── ApiResponse.java
     └── web/
         └── WebViewActivity.java
 ```
@@ -52,16 +57,52 @@ Android displays the system launch screen first. Its background is configured as
 
 ## Login
 
-`LoginView` collects the username and password and delegates authentication to `LoginService`. `MockLoginService` responds after 650 milliseconds.
+`LoginView` collects the username and password and delegates authentication to the single `LoginService`. The service creates the login request and executes it through the application-wide `ApiClient`.
 
-The mock credentials are:
+The project-wide runtime toggle is in `app/src/main/assets/app-settings.json`:
 
-```text
-Username: demo
-Password: demo
+```json
+{
+  "isMockMode": true,
+  "apiBaseUrl": "https://api.example.com/v1"
+}
 ```
 
+- `isMockMode: true` makes `ApiClient` return the request's bundled response JSON without making a network call.
+- `isMockMode: false` makes `ApiClient` send the request to `apiBaseUrl`.
+
+The setting controls every API executed by `ApiClient`, not only login. Replace the example base URL before disabling mock mode. The login page also provides a runtime mock-mode switch that overrides the startup setting for the current screen. When enabled, its response selector can exercise success, API failures, invalid payloads, missing payloads, network failure, and timeout handling.
+
 On failure, the login screen remains visible and displays an error. On success, `LoginActivity` starts `WebViewActivity` and finishes itself. `WebViewActivity` initializes Cordova with `loadUrl(launchUrl)` and loads the bundled application.
+
+## Login API Contract
+
+The real service sends:
+
+```json
+{
+  "username": "entered username",
+  "password": "entered password"
+}
+```
+
+Mock and real responses use the same shape:
+
+```json
+{
+  "success": true,
+  "message": "Login successful.",
+  "data": {
+    "accessToken": "token",
+    "user": {
+      "id": "user-id",
+      "displayName": "User Name"
+    }
+  }
+}
+```
+
+The bundled login payloads are under `app/src/main/assets/mock-responses/login/`. See the project root `API.md` for the scenario list, complete contract, and process for adding another endpoint.
 
 ## Logout
 

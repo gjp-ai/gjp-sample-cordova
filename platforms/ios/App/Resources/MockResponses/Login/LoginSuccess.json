@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "message": "Login successful.",
+  "data": {
+    "accessToken": "mock-access-token",
+    "user": {
+      "id": "demo-user",
+      "displayName": "Demo User"
+    }
+  }
+}

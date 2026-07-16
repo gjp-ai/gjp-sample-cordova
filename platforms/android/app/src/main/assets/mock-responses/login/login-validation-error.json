@@ -1,0 +1,8 @@
+{
+  "success": false,
+  "message": "The login request contains invalid fields.",
+  "data": null,
+  "errors": {
+    "username": ["Username format is invalid."]
+  }
+}
