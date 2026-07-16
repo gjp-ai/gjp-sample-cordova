@@ -4,8 +4,25 @@
 # Node dependencies
 node_modules/
 
-# Cordova generated dependencies
-plugins/
+# Local environment and signing credentials
+.env
+.env.*
+!.env.example
+build.json
+release-signing.properties
+debug-signing.properties
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+
+# Cordova generated dependencies. Keep the local NativeSession plugin source.
+/plugins/*
+!/plugins/native-session/
+!/plugins/native-session/**
+platforms/android/app/src/main/assets/www/plugins/
+platforms/android/platform_www/plugins/
+platforms/ios/packages/**/Plugins/
 
 # Keep platforms/ tracked because native application code lives there.
 # Ignore only native build output and machine-local state.
@@ -15,12 +32,17 @@ platforms/**/local.properties
 platforms/**/*.apk
 platforms/**/*.aab
 platforms/**/*.ap_
+platforms/android/tools/.gradle/
+platforms/android/tools/gradle/
+platforms/android/tools/gradlew
+platforms/android/tools/gradlew.bat
 
 # Cordova and mobile build outputs
 www/cordova.js
 www/cordova_plugins.js
 www/plugins/
 build/
+artifacts/
 dist/
 coverage/
 
@@ -29,6 +51,7 @@ coverage/
 *.apk
 *.aab
 *.ap_
+*.ipa
 local.properties
 
 # iOS build artifacts
@@ -38,6 +61,9 @@ DerivedData/
 *.xcuserstate
 *.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
+*.xcarchive
+*.dSYM
+*.dSYM.zip
 
 # Logs and temporary files
 *.log

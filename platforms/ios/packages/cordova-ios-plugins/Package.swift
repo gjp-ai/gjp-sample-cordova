@@ -24,8 +24,8 @@ import PackageDescription
 let package = Package(
     name: "CordovaPlugins",
     platforms: [
-        .iOS(.v13),
-        .macCatalyst(.v13)
+        .iOS("15.0"),
+        .macCatalyst("15.0")
     ],
     products: [
         .library(name: "CordovaPlugins", targets: ["CordovaPlugins"])

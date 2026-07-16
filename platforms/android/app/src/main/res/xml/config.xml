@@ -1,14 +1,25 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.ganjianping.sample" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.ganjianping.sample" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <feature name="NativeSession">
+        <param name="android-package" value="com.ganjianping.plugins.nativesession.NativeSession" />
+    </feature>
     <name>GJPS</name>
-    <description>
-        A sample Apache Cordova application that responds to the deviceready event.
-    </description>
+    <description>A sample hybrid finance application built with React and Apache Cordova.</description>
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
         Apache Cordova Team
     </author>
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <hook src="scripts/build-web.js" type="before_prepare" />
+    <hook src="scripts/after-prepare-android.js" type="after_prepare" />
+    <icon background="resources/android/ldpi/ic_launcher_background.png" density="ldpi" foreground="resources/android/ldpi/ic_launcher_foreground.png" monochrome="resources/android/ldpi/ic_launcher_monochrome.png" src="resources/android/ldpi/ic_launcher.png" />
+    <icon background="resources/android/mdpi/ic_launcher_background.png" density="mdpi" foreground="resources/android/mdpi/ic_launcher_foreground.png" monochrome="resources/android/mdpi/ic_launcher_monochrome.png" src="resources/android/mdpi/ic_launcher.png" />
+    <icon background="resources/android/hdpi/ic_launcher_background.png" density="hdpi" foreground="resources/android/hdpi/ic_launcher_foreground.png" monochrome="resources/android/hdpi/ic_launcher_monochrome.png" src="resources/android/hdpi/ic_launcher.png" />
+    <icon background="resources/android/xhdpi/ic_launcher_background.png" density="xhdpi" foreground="resources/android/xhdpi/ic_launcher_foreground.png" monochrome="resources/android/xhdpi/ic_launcher_monochrome.png" src="resources/android/xhdpi/ic_launcher.png" />
+    <icon background="resources/android/xxhdpi/ic_launcher_background.png" density="xxhdpi" foreground="resources/android/xxhdpi/ic_launcher_foreground.png" monochrome="resources/android/xxhdpi/ic_launcher_monochrome.png" src="resources/android/xxhdpi/ic_launcher.png" />
+    <icon background="resources/android/xxxhdpi/ic_launcher_background.png" density="xxxhdpi" foreground="resources/android/xxxhdpi/ic_launcher_foreground.png" monochrome="resources/android/xxxhdpi/ic_launcher_monochrome.png" src="resources/android/xxxhdpi/ic_launcher.png" />
+    <resource-file src="resources/splash/icon.png" target="app/src/main/res/drawable/splash_icon.png" />
     <preference name="loglevel" value="DEBUG" />
+    <preference name="AndroidWindowSplashScreenBackground" value="#123B72" />
 </widget>

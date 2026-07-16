@@ -2,10 +2,19 @@
   "name": "com.ganjianping.sample",
   "displayName": "GJPS",
   "version": "1.0.0",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "description": "A sample hybrid finance application built with React and Apache Cordova.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run web:build",
+    "test": "npm run web:build",
+    "android:simulator": "bash scripts/mobile/run-android-simulator.sh",
+    "ios:simulator": "bash scripts/mobile/run-ios-simulator.sh",
+    "android:apk": "bash scripts/mobile/build-android.sh apk",
+    "android:aab": "bash scripts/mobile/build-android.sh aab",
+    "ios:ipa": "bash scripts/mobile/build-ios-ipa.sh",
+    "web:build": "vite build",
+    "web:dev": "vite --host 127.0.0.1",
+    "web:preview": "vite preview --host 127.0.0.1"
   },
   "keywords": [
     "ecosystem:cordova"
@@ -13,13 +22,31 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.3",
     "cordova-android": "^15.0.0",
-    "cordova-ios": "^8.1.1"
+    "cordova-ios": "^8.1.1",
+    "elementtree": "^0.1.7",
+    "vite": "^8.1.4"
   },
   "cordova": {
     "platforms": [
       "ios",
       "android"
-    ]
+    ],
+    "plugins": {
+      "com.ganjianping.native-session": {}
+    }
+  },
+  "dependencies": {
+    "com.ganjianping.native-session": "file:plugins/native-session",
+    "lucide-react": "^1.24.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true
   }
 }

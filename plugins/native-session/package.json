@@ -1,0 +1,19 @@
+{
+  "name": "com.ganjianping.native-session",
+  "version": "1.0.0",
+  "description": "Cordova bridge for native session actions.",
+  "cordova": {
+    "id": "com.ganjianping.native-session",
+    "platforms": [
+      "ios",
+      "android"
+    ]
+  },
+  "keywords": [
+    "cordova",
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android"
+  ],
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="com.ganjianping.native-session"
+        version="1.0.0">
+    <name>NativeSession</name>
+    <description>Bridges web session actions to the native application flow.</description>
+    <license>Apache-2.0</license>
+
+    <js-module src="www/nativeSession.js" name="NativeSession">
+        <clobbers target="NativeSession" />
+    </js-module>
+
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="NativeSession">
+                <param name="ios-package" value="NativeSession" />
+            </feature>
+        </config-file>
+        <header-file src="src/ios/NativeSession.h" />
+        <source-file src="src/ios/NativeSession.m" />
+    </platform>
+
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="NativeSession">
+                <param name="android-package" value="com.ganjianping.plugins.nativesession.NativeSession" />
+            </feature>
+        </config-file>
+        <source-file src="src/android/NativeSession.java"
+                     target-dir="src/com/ganjianping/plugins/nativesession" />
+    </platform>
+</plugin>

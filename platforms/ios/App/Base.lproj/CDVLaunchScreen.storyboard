@@ -38,16 +38,35 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchStoryboard" translatesAutoresizingMaskIntoConstraints="NO" id="2ns-9I-Qjs">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" alignment="center" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="a8Q-g1-k2L">
+                                <rect key="frame" x="92" y="343" width="230" height="210"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="SplashIcon" translatesAutoresizingMaskIntoConstraints="NO" id="4dC-N7-p8R">
+                                        <rect key="frame" x="25" y="0.0" width="180" height="160"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="180" id="xG8-W4-sM2"/>
+                                            <constraint firstAttribute="height" constant="160" id="yH9-X5-tN3"/>
+                                        </constraints>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Preparing your workspace" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5eD-P8-q9S">
+                                        <rect key="frame" x="0.0" y="172" width="230" height="19"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="0.85" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="6fE-Q9-r0T">
+                                        <rect key="frame" x="105" y="203" width="20" height="18"/>
+                                        <color key="color" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" name="SplashScreenBackgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="2ns-9I-Qjs" secondAttribute="trailing" id="FZL-3Z-NFz"/>
-                            <constraint firstItem="2ns-9I-Qjs" firstAttribute="bottom" secondItem="Ze5-6b-2t3" secondAttribute="bottom" id="L9l-pw-wXj"/>
-                            <constraint firstItem="2ns-9I-Qjs" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="oGN-hc-Uzj"/>
-                            <constraint firstItem="2ns-9I-Qjs" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="rS9-Wd-zY4"/>
+                            <constraint firstItem="a8Q-g1-k2L" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="28" id="FZL-3Z-NFz"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="a8Q-g1-k2L" secondAttribute="trailing" constant="28" id="L9l-pw-wXj"/>
+                            <constraint firstItem="a8Q-g1-k2L" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="oGN-hc-Uzj"/>
+                            <constraint firstItem="a8Q-g1-k2L" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="rS9-Wd-zY4"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -57,9 +76,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchStoryboard" width="1366" height="1366"/>
+        <image name="SplashIcon" width="1024" height="1024"/>
         <namedColor name="SplashScreenBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <color red="0.07" green="0.23" blue="0.45" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>
