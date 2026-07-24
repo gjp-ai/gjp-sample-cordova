@@ -4,17 +4,15 @@ final class LoginViewController: UIViewController {
     var onLoginSuccess: (() -> Void)?
 
     private let loginService: LoginService
+    private let initialErrorMessage: String?
     private let usernameField = UITextField()
     private let passwordField = UITextField()
     private let errorLabel = UILabel()
     private let loginButton = UIButton(type: .system)
-    private let mockModeSwitch = UISwitch()
-    private let mockScenarioButton = UIButton(type: .system)
-    private let mockHintLabel = UILabel()
-    private var mockScenario: LoginMockScenario = .success
 
-    init(loginService: LoginService) {
+    init(loginService: LoginService, initialErrorMessage: String? = nil) {
         self.loginService = loginService
+        self.initialErrorMessage = initialErrorMessage
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -26,6 +24,10 @@ final class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         buildView()
+        if let initialErrorMessage {
+            errorLabel.text = initialErrorMessage
+            errorLabel.isHidden = false
+        }
     }
 
     deinit {
@@ -57,24 +59,6 @@ final class LoginViewController: UIViewController {
         passwordField.returnKeyType = .go
         passwordField.addTarget(self, action: #selector(submitLogin), for: .editingDidEndOnExit)
 
-        let mockModeLabel = UILabel()
-        mockModeLabel.text = "Mock mode"
-        mockModeLabel.textColor = UIColor(red: 0.07, green: 0.13, blue: 0.23, alpha: 1)
-        mockModeSwitch.isOn = loginService.isMockMode
-        mockModeSwitch.accessibilityLabel = "Enable mock mode"
-        mockModeSwitch.addTarget(self, action: #selector(mockModeChanged), for: .valueChanged)
-        let mockModeRow = UIStackView(arrangedSubviews: [mockModeLabel, UIView(), mockModeSwitch])
-        mockModeRow.axis = .horizontal
-        mockModeRow.alignment = .center
-
-        mockScenarioButton.contentHorizontalAlignment = .leading
-        mockScenarioButton.layer.borderWidth = 1
-        mockScenarioButton.layer.borderColor = UIColor.systemGray4.cgColor
-        mockScenarioButton.layer.cornerRadius = 8
-        mockScenarioButton.heightAnchor.constraint(equalToConstant: 44).isActive = true
-        mockScenarioButton.showsMenuAsPrimaryAction = true
-        configureMockScenarioMenu()
-
         errorLabel.textColor = .systemRed
         errorLabel.font = .systemFont(ofSize: 14)
         errorLabel.numberOfLines = 0
@@ -88,21 +72,13 @@ final class LoginViewController: UIViewController {
         loginButton.heightAnchor.constraint(equalToConstant: 48).isActive = true
         loginButton.addTarget(self, action: #selector(submitLogin), for: .touchUpInside)
 
-        mockHintLabel.text = "Mock responses are loaded from the app bundle"
-        mockHintLabel.textColor = .secondaryLabel
-        mockHintLabel.font = .systemFont(ofSize: 13)
-        mockHintLabel.textAlignment = .center
-
         let stackView = UIStackView(arrangedSubviews: [
             titleLabel,
             subtitleLabel,
             usernameField,
             passwordField,
-            mockModeRow,
-            mockScenarioButton,
             errorLabel,
-            loginButton,
-            mockHintLabel
+            loginButton
         ])
         stackView.axis = .vertical
         stackView.spacing = 14
@@ -114,7 +90,6 @@ final class LoginViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -28),
             stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
-        updateMockControls()
     }
 
     private func configure(_ field: UITextField, placeholder: String) {
@@ -135,12 +110,12 @@ final class LoginViewController: UIViewController {
 
         loginService.login(
             username: usernameField.text ?? "",
-            password: passwordField.text ?? "",
-            mockScenario: mockScenario
+            password: passwordField.text ?? ""
         ) { [weak self] result in
             guard let self else { return }
             switch result {
-            case .success:
+            case .success(let session):
+                SessionStore.shared.save(session)
                 self.onLoginSuccess?()
             case .failure(let error):
                 self.errorLabel.text = error.localizedDescription
@@ -157,33 +132,7 @@ final class LoginViewController: UIViewController {
         usernameField.isEnabled = !isLoading
         passwordField.isEnabled = !isLoading
         loginButton.isEnabled = !isLoading
-        mockModeSwitch.isEnabled = !isLoading
-        mockScenarioButton.isEnabled = !isLoading
         loginButton.setTitle(isLoading ? "Signing in..." : "Sign in", for: .normal)
     }
 
-    @objc private func mockModeChanged() {
-        loginService.setMockMode(mockModeSwitch.isOn)
-        errorLabel.isHidden = true
-        updateMockControls()
-    }
-
-    private func configureMockScenarioMenu() {
-        let actions = LoginMockScenario.allCases.map { scenario in
-            UIAction(
-                title: scenario.title,
-                state: scenario == mockScenario ? .on : .off
-            ) { [weak self] _ in
-                self?.mockScenario = scenario
-                self?.configureMockScenarioMenu()
-            }
-        }
-        mockScenarioButton.setTitle("Mock response: \(mockScenario.title)", for: .normal)
-        mockScenarioButton.menu = UIMenu(title: "Mock login response", children: actions)
-    }
-
-    private func updateMockControls() {
-        mockScenarioButton.isHidden = !mockModeSwitch.isOn
-        mockHintLabel.isHidden = !mockModeSwitch.isOn
-    }
 }

@@ -36,7 +36,7 @@ web/
 Vite builds this source into the root `www/` directory:
 
 ```text
-web/ source -> Vite build -> www/ -> cordova prepare -> platform web assets
+web/ source -> Vite build -> www/ -> native:web-sync -> platform web assets
 ```
 
 The platform destinations are:
@@ -44,9 +44,9 @@ The platform destinations are:
 - Android: `platforms/android/app/src/main/assets/www/`
 - iOS: `platforms/ios/www/`
 
-`www/` and the platform web asset directories are generated output. Make web changes in `web/`, not in those generated directories.
+The React application files in `www/` and the platform web asset directories are generated output. Make React changes in `web/`, not in those generated directories. The Cordova runtime and `NativeSession` plugin files inside the platform directories are committed native-project dependencies and are preserved by the sync script.
 
-The root `config.xml` registers `scripts/build-web.js` as a `before_prepare` hook. As a result, `cordova prepare`, `cordova build`, and `cordova run` build the React application before Cordova copies it into a platform.
+Run `npm run native:web-sync` to build React and synchronize it to both native projects. Normal builds do not run `cordova prepare`; that command is reserved for intentional Cordova dependency migrations through the guarded prepare scripts documented in the root `README.md`.
 
 ## Browser Mode
 
@@ -103,7 +103,7 @@ After a successful login, the hook stores the session flag and React renders the
 
 The logout button in the More view calls `useWebSession.logout()`. This removes the session flag and updates React state, causing `App` to render `LoginPage` again.
 
-No Cordova API is available or required in browser mode. `web/public/cordova.js` is an empty placeholder so the shared HTML can reference `/cordova.js` without producing a missing-file error during browser development and Vite builds.
+No Cordova API is available or required in browser mode. `web/public/cordova.js` is a browser placeholder so the shared HTML can reference `/cordova.js` without producing a missing-file error during browser development and Vite builds.
 
 ## Android Mode
 
@@ -116,7 +116,7 @@ Android system launch screen
 SplashActivity
         |
         v
-LoginActivity + MockLoginService
+LoginActivity + LoginService
         |
         v
 WebViewActivity (CordovaActivity)
@@ -134,11 +134,13 @@ NativeSession.logout()
 WebViewActivity finishes -> LoginActivity
 ```
 
-`SplashActivity` is the launcher activity. It shows the native splash, then opens `LoginActivity`. A successful native mock login creates `WebViewActivity`; only this activity extends `CordovaActivity` and loads the bundled `www/index.html`.
+`SplashActivity` is the launcher activity. It shows the native splash, then opens `LoginActivity`. Reserved `mock` credentials load a local response; ordinary credentials call the real API. A successful login creates the native session and `WebViewActivity`; only this activity extends `CordovaActivity` and loads the bundled `www/index.html`.
 
 When React starts inside the web view, Cordova provides `window.cordova`. `useWebSession` treats that as an authenticated native host and skips `LoginPage`, because native login has already succeeded.
 
 For logout, the More view calls `window.NativeSession.logout()`. The plugin invokes the Android `NativeSession` implementation through Cordova `exec`. `WebViewActivity` receives the request, opens a fresh `LoginActivity`, and finishes the current Cordova activity.
+
+Native touch monitoring warns after one inactive minute and forces the same logout flow after two inactive minutes.
 
 See `platforms/android/APP_WORKFLOW.md` for the complete Android activity lifecycle.
 
@@ -156,7 +158,7 @@ AppFlowViewController
 SplashViewController
         |
         v
-LoginViewController + MockLoginService
+LoginViewController + LoginService
         |
         v
 WebViewController (Cordova MainViewController)
@@ -180,6 +182,8 @@ As on Android, `useWebSession` detects `window.cordova` and skips the React logi
 
 For logout, `window.NativeSession.logout()` invokes the iOS plugin through Cordova `exec`. The plugin posts `NativeSessionDidRequestLogout`; `WebViewController` observes it and asks `AppFlowViewController` to replace the web controller with a new `LoginViewController`.
 
+Native touch monitoring warns after one inactive minute and forces the same logout flow after two inactive minutes.
+
 See `platforms/ios/APP_WORKFLOW.md` for the complete iOS controller lifecycle.
 
 ## Runtime Detection And Session Ownership
@@ -193,8 +197,8 @@ The runtime split is implemented by two hooks:
 | --- | --- | --- | --- |
 | Splash | None | Native | Native |
 | Login UI | React `LoginPage` | Native `LoginActivity` | Native `LoginViewController` |
-| Login service | Web mock | Android mock | iOS mock |
-| Session owner | React + `sessionStorage` | Native activity flow | Native controller flow |
+| Login service | Web mock | Native mock or real API | Native mock or real API |
+| Session owner | React + `sessionStorage` | Native `SessionStore` | Native `SessionStore` |
 | Application UI | React | React in Cordova | React in Cordova |
 | Logout handler | React | `NativeSession` plugin | `NativeSession` plugin |
 
@@ -206,7 +210,7 @@ The local plugin source is in `plugins/native-session/` and exposes one JavaScri
 window.NativeSession.logout(successCallback, errorCallback);
 ```
 
-Cordova installs the platform implementation during prepare:
+The plugin source and each platform implementation are committed to the repository. The guarded prepare command refreshes them only during an intentional Cordova migration:
 
 ```text
 React More view
@@ -245,7 +249,9 @@ After changing web source, validate both modes:
 
 ```sh
 npm run web:build
-cordova prepare android ios
+npm run native:web-sync
+npm run android:simulator
+npm run ios:simulator
 ```
 
 Use `npm run web:dev` for browser testing, then run the native applications to verify Cordova detection and plugin logout behavior.

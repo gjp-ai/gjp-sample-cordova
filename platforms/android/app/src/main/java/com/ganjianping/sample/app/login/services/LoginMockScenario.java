@@ -13,6 +13,8 @@ public enum LoginMockScenario {
     NETWORK_ERROR("Network error", null, 0, "Unable to connect to the login service."),
     TIMEOUT("Request timeout", null, 0, "The login request timed out. Please try again.");
 
+    public static final String MOCK_USERNAME = "mock";
+
     public final String title;
     public final String responseAsset;
     public final int statusCode;
@@ -28,5 +30,16 @@ public enum LoginMockScenario {
     @Override
     public String toString() {
         return title;
+    }
+
+    public static LoginMockScenario fromPassword(String password) {
+        String normalized = password.trim().toLowerCase().replace('_', '-');
+        for (LoginMockScenario scenario : values()) {
+            String scenarioName = scenario.name().toLowerCase().replace('_', '-');
+            if (scenarioName.equals(normalized)) {
+                return scenario;
+            }
+        }
+        return null;
     }
 }

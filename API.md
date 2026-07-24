@@ -1,4 +1,20 @@
-# Native API Contract
+# Native Finance API Contract
+
+The local reference implementation is under `api/`. It exposes the versioned login route at `POST /v1/login`; the endpoint paths below are relative to the configured `/v1` base URL.
+
+## Design Rules
+
+All native APIs use a consistent JSON envelope. Endpoint-specific fields belong under `data`; transport and correlation fields belong under `meta`.
+
+- Use HTTPS only outside mock mode.
+- Use UUID request and response identifiers for tracing. Never use them as business identifiers.
+- Use ISO 8601 UTC timestamps with milliseconds, such as `2026-07-17T08:30:00.000Z`.
+- Represent monetary values as decimal strings plus ISO 4217 currency codes. Never use JSON floating-point numbers for money.
+- Use opaque identifiers for customers, accounts, payments, and transactions.
+- Return masked account and card labels for display. Do not expose full account or card numbers.
+- Keep access tokens in the `Authorization: Bearer <token>` header after login, not in later request bodies.
+- Require an `Idempotency-Key` header for money-moving commands such as payments and transfers.
+- Never log passwords, tokens, personal data, or complete request/response bodies in production.
 
 ## Runtime Configuration
 
@@ -6,7 +22,7 @@ Android and iOS use the same application-wide settings schema:
 
 ```json
 {
-  "isMockMode": true,
+  "isMockMode": false,
   "apiBaseUrl": "https://api.example.com/v1",
   "requestTimeoutSeconds": 15,
   "mockResponseDelayMilliseconds": 650
@@ -16,11 +32,87 @@ Android and iOS use the same application-wide settings schema:
 - Android: `platforms/android/app/src/main/assets/app-settings.json`
 - iOS: `platforms/ios/App/Resources/AppSettings.json`
 
-When `isMockMode` is `true`, the shared native API client does not make a network request. It loads the response file assigned to the API request from the application bundle. When it is `false`, the same request is sent to `apiBaseUrl`.
+When `isMockMode` is enabled, the shared API client loads the response file assigned to a request by default. Otherwise, it sends requests to `apiBaseUrl`. Login has a credential-based per-request override: username `mock` selects a local response, while every other username uses the real endpoint. There is no mock control in the login UI.
 
-This behavior belongs to the shared API client and applies to every native API, not only login. Each API request must provide a local mock response filename.
+## Request Envelope
 
-## Login
+Every JSON request uses this shape:
+
+```json
+{
+  "meta": {
+    "requestId": "89feea61-aadc-4fc8-9610-9d6dc57403fc",
+    "sentAt": "2026-07-17T08:30:00.000Z",
+    "apiVersion": "1.0",
+    "channel": "MOBILE",
+    "locale": "en-SG"
+  },
+  "data": {}
+}
+```
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `meta.requestId` | UUID string | Yes | Client-generated correlation identifier. |
+| `meta.sentAt` | UTC timestamp | Yes | Time the client created the request. |
+| `meta.apiVersion` | string | Yes | Contract version, independent of the app version. |
+| `meta.channel` | string | Yes | Calling channel; native apps send `MOBILE`. |
+| `meta.locale` | BCP 47 string | Yes | Locale used for customer-facing messages. |
+| `data` | object | Yes | Endpoint-specific request payload. |
+
+## Response Envelope
+
+Every JSON response uses this shape:
+
+```json
+{
+  "meta": {
+    "requestId": "89feea61-aadc-4fc8-9610-9d6dc57403fc",
+    "responseId": "fa6c6202-ec11-4ca9-91d9-fb9e4bc5619d",
+    "respondedAt": "2026-07-17T08:30:00.250Z",
+    "outcome": "SUCCESS"
+  },
+  "data": {},
+  "errors": []
+}
+```
+
+`outcome` is `SUCCESS`, `FAILURE`, or `PARTIAL`. A successful response has endpoint data and an empty `errors` array. A failed response normally has `data: null` and at least one error. `PARTIAL` is reserved for operations where some independently actionable items succeeded.
+
+Each error uses this shape:
+
+```json
+{
+  "code": "AUTH_RATE_LIMITED",
+  "message": "Too many sign-in attempts. Please try again later.",
+  "field": null,
+  "retryable": true,
+  "retryAfterSeconds": 60
+}
+```
+
+`code` is stable and machine-readable. `message` is safe to show to the customer and must not reveal internal systems or security decisions. `field` is an optional request path. `retryAfterSeconds` is present only when the server can provide useful retry guidance.
+
+## HTTP Statuses
+
+| Status | Usage |
+| --- | --- |
+| `200` | Successful query or command. |
+| `201` | Resource created. |
+| `202` | Command accepted for asynchronous processing. |
+| `400` | Invalid request fields or envelope. |
+| `401` | Authentication failed or token is invalid. |
+| `403` | Authenticated customer is not permitted. |
+| `404` | Requested business resource does not exist. |
+| `409` | Business conflict or duplicate command. |
+| `423` | Account or security access is locked. |
+| `429` | Rate limit exceeded. |
+| `500` | Unexpected server failure. |
+| `503` | Service temporarily unavailable. |
+
+The client evaluates both the HTTP status and response envelope. It must not treat `200` as success when `meta.outcome` is `FAILURE`, or accept `SUCCESS` from a non-2xx response.
+
+## Login API
 
 ### Request
 
@@ -32,91 +124,99 @@ Content-Type: application/json; charset=utf-8
 
 ```json
 {
-  "username": "demo",
-  "password": "demo"
-}
-```
-
-| Field | Type | Required | Description |
-| --- | --- | --- | --- |
-| `username` | string | Yes | User login name. |
-| `password` | string | Yes | User password. |
-
-### Successful Response
-
-HTTP status: `200`
-
-```json
-{
-  "success": true,
-  "message": "Login successful.",
+  "meta": {
+    "requestId": "89feea61-aadc-4fc8-9610-9d6dc57403fc",
+    "sentAt": "2026-07-17T08:30:00.000Z",
+    "apiVersion": "1.0",
+    "channel": "MOBILE",
+    "locale": "en-SG"
+  },
   "data": {
-    "accessToken": "access-token",
-    "user": {
-      "id": "user-id",
-      "displayName": "User Name"
-    }
+    "username": "demo",
+    "password": "demo"
   }
 }
 ```
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `success` | boolean | Whether authentication succeeded. |
-| `message` | string | Human-readable result message. |
-| `data.accessToken` | string | Token used by authenticated API requests. |
-| `data.user.id` | string | Stable user identifier. |
-| `data.user.displayName` | string | User-facing name. |
+Both credential fields are required strings. The server must return the same customer-safe error for an unknown username and an incorrect password to avoid account enumeration.
 
-### Failed Response
-
-Expected HTTP status: `400` or `401`
+### Success
 
 ```json
 {
-  "success": false,
-  "message": "Invalid username or password.",
-  "data": null
+  "meta": {
+    "requestId": "89feea61-aadc-4fc8-9610-9d6dc57403fc",
+    "responseId": "fa6c6202-ec11-4ca9-91d9-fb9e4bc5619d",
+    "respondedAt": "2026-07-17T08:30:00.250Z",
+    "outcome": "SUCCESS"
+  },
+  "data": {
+    "session": {
+      "accessToken": "access-token",
+      "refreshToken": "refresh-token",
+      "tokenType": "Bearer",
+      "expiresInSeconds": 900
+    },
+    "customer": {
+      "customerId": "customer-001",
+      "displayName": "Demo User",
+      "lastLoginAt": "2026-07-16T08:30:00.000Z"
+    }
+  },
+  "errors": []
 }
 ```
 
-The native login screen remains visible and displays `message`. Transport failures and malformed response payloads use a local error message.
+Tokens are returned only by authentication/refresh endpoints. The sample retains them only in native process memory, adds the access token to authenticated native API requests, and clears the session on logout or inactivity timeout. A production app that needs session restoration must use Keychain or Android Keystore-backed storage. `lastLoginAt` supports customer security awareness and is not used for authorization decisions.
 
-### Mock Response
+### Failure
 
-- Android: `platforms/android/app/src/main/assets/mock-responses/login/login-success.json`
-- iOS: `platforms/ios/App/Resources/MockResponses/Login/LoginSuccess.json`
+```json
+{
+  "meta": {
+    "requestId": "89feea61-aadc-4fc8-9610-9d6dc57403fc",
+    "responseId": "fa6c6202-ec11-4ca9-91d9-fb9e4bc5619d",
+    "respondedAt": "2026-07-17T08:30:00.250Z",
+    "outcome": "FAILURE"
+  },
+  "data": null,
+  "errors": [
+    {
+      "code": "AUTH_INVALID_CREDENTIALS",
+      "message": "The username or password is incorrect.",
+      "field": null,
+      "retryable": false
+    }
+  ]
+}
+```
 
-Mock mode returns this file directly after `mockResponseDelayMilliseconds`. It does not validate the submitted credentials or contact the configured server.
+## Login Mock Scenarios
 
-The native login page can override `isMockMode` for the current screen. Enabling it displays a mock response selector with these cases:
+Enter username `mock` and use the scenario name as the password. For example, `mock` / `success` loads the successful response. Hyphenated passwords select the remaining scenarios.
 
-| Scenario | HTTP status | Local payload or behavior |
+| Password | HTTP status | Code or behavior |
 | --- | --- | --- |
-| Success | 200 | Valid authenticated response. |
-| Invalid credentials | 401 | Failed response with an authentication message. |
-| Validation error | 400 | Failed response with field validation details. |
-| Account locked | 423 | Failed response indicating that access is locked. |
-| Rate limited | 429 | Failed response asking the user to retry later. |
-| Server error | 500 | Failed response indicating temporary service failure. |
-| Malformed response | 200 | JSON that does not match the login response schema. |
-| Empty response | 200 | Empty response body. |
-| Missing payload | 200 | References a deliberately absent bundle file. |
-| Network error | N/A | Simulated transport failure; no payload is loaded. |
-| Request timeout | N/A | Simulated timeout; no payload is loaded. |
-
-Login payloads are grouped by feature:
+| `success` | 200 | Valid session and customer data. |
+| `invalid-credentials` | 401 | `AUTH_INVALID_CREDENTIALS`. |
+| `validation-error` | 400 | `REQUEST_FIELD_INVALID`. |
+| `account-locked` | 423 | `AUTH_ACCOUNT_LOCKED`. |
+| `rate-limited` | 429 | `AUTH_RATE_LIMITED`, retry after 60 seconds. |
+| `server-error` | 500 | `SERVICE_TEMPORARILY_UNAVAILABLE`, retry after 30 seconds. |
+| `malformed-response` | 200 | JSON outside the response contract. |
+| `empty-response` | 200 | Empty response body. |
+| `missing-payload` | 200 | Valid envelope with missing endpoint data. |
+| `network-error` | N/A | Simulated transport failure. |
+| `timeout` | N/A | Simulated timeout. |
 
 - Android: `platforms/android/app/src/main/assets/mock-responses/login/`
 - iOS: `platforms/ios/App/Resources/MockResponses/Login/`
 
-The login UI also handles empty username/password input before executing the request. A failed or exceptional response keeps the user on the login page, restores all controls, and displays a specific error message.
-
 ## Adding Another API
 
-1. Add the endpoint-specific service and request/response models in the feature folder.
-2. Create a feature folder and its response JSON under Android `assets/mock-responses/` and iOS `Resources/MockResponses/`.
-3. Build an `ApiRequest`/`APIRequest` with the HTTP method, relative path, body, and mock response filename.
-4. Execute it through the shared `ApiClient`/`APIClient`.
-
-Do not add endpoint-specific mock service classes. Mock selection remains centralized in the application settings and shared API client.
+1. Define endpoint-specific request and response `data` models while reusing the common envelopes.
+2. Use decimal strings and ISO currency codes for every monetary field.
+3. Assign documented stable error codes and HTTP statuses.
+4. Add payloads under a feature folder in Android `assets/mock-responses/` and iOS `Resources/MockResponses/`.
+5. Execute the request through the shared API client; do not add endpoint-specific mock service classes.
+6. For payment or transfer commands, send an `Idempotency-Key` and return the same result for retries with that key.

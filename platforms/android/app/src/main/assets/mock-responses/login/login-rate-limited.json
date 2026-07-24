@@ -1,5 +1,18 @@
 {
-  "success": false,
-  "message": "Too many sign-in attempts. Please try again later.",
-  "data": null
+  "meta": {
+    "requestId": "00000000-0000-4000-8000-000000000005",
+    "responseId": "00000000-0000-4000-8000-000000000105",
+    "respondedAt": "2026-07-17T00:00:00.650Z",
+    "outcome": "FAILURE"
+  },
+  "data": null,
+  "errors": [
+    {
+      "code": "AUTH_RATE_LIMITED",
+      "message": "Too many sign-in attempts. Please try again later.",
+      "field": null,
+      "retryable": true,
+      "retryAfterSeconds": 60
+    }
+  ]
 }

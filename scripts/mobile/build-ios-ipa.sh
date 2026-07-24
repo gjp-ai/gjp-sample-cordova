@@ -8,6 +8,7 @@ source "$SCRIPT_DIR/common.sh"
 [[ "$(uname -s)" == "Darwin" ]] || fail "IPA generation requires macOS."
 require_command xcodebuild
 require_command plutil
+require_command node
 
 EXPORT_METHOD="${IOS_EXPORT_METHOD:-debugging}"
 case "$EXPORT_METHOD" in
@@ -22,7 +23,7 @@ case "$EXPORT_METHOD" in
 esac
 
 cd "$PROJECT_ROOT"
-run_cordova prepare ios
+node "$PROJECT_ROOT/scripts/mobile/sync-web.js"
 
 WORKSPACE="$PROJECT_ROOT/platforms/ios/App.xcworkspace"
 SCHEME="${IOS_SCHEME:-App}"

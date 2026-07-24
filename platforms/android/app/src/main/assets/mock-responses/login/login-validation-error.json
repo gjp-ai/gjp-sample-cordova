@@ -1,8 +1,17 @@
 {
-  "success": false,
-  "message": "The login request contains invalid fields.",
+  "meta": {
+    "requestId": "00000000-0000-4000-8000-000000000003",
+    "responseId": "00000000-0000-4000-8000-000000000103",
+    "respondedAt": "2026-07-17T00:00:00.650Z",
+    "outcome": "FAILURE"
+  },
   "data": null,
-  "errors": {
-    "username": ["Username format is invalid."]
-  }
+  "errors": [
+    {
+      "code": "REQUEST_FIELD_INVALID",
+      "message": "Enter a valid username.",
+      "field": "data.username",
+      "retryable": false
+    }
+  ]
 }

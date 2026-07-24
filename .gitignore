@@ -20,8 +20,6 @@ debug-signing.properties
 /plugins/*
 !/plugins/native-session/
 !/plugins/native-session/**
-platforms/android/app/src/main/assets/www/plugins/
-platforms/android/platform_www/plugins/
 platforms/ios/packages/**/Plugins/
 
 # Keep platforms/ tracked because native application code lives there.

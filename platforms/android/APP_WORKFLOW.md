@@ -43,6 +43,9 @@ app/src/main/java/com/ganjianping/sample/
     │   ├── ApiClient.java
     │   ├── ApiRequest.java
     │   └── ApiResponse.java
+    ├── session/
+    │   ├── SessionStore.java
+    │   └── SessionInactivityManager.java
     └── web/
         └── WebViewActivity.java
 ```
@@ -59,11 +62,11 @@ Android displays the system launch screen first. Its background is configured as
 
 `LoginView` collects the username and password and delegates authentication to the single `LoginService`. The service creates the login request and executes it through the application-wide `ApiClient`.
 
-The project-wide runtime toggle is in `app/src/main/assets/app-settings.json`:
+The project-wide API default is in `app/src/main/assets/app-settings.json`:
 
 ```json
 {
-  "isMockMode": true,
+  "isMockMode": false,
   "apiBaseUrl": "https://api.example.com/v1"
 }
 ```
@@ -71,44 +74,41 @@ The project-wide runtime toggle is in `app/src/main/assets/app-settings.json`:
 - `isMockMode: true` makes `ApiClient` return the request's bundled response JSON without making a network call.
 - `isMockMode: false` makes `ApiClient` send the request to `apiBaseUrl`.
 
-The setting controls every API executed by `ApiClient`, not only login. Replace the example base URL before disabling mock mode. The login page also provides a runtime mock-mode switch that overrides the startup setting for the current screen. When enabled, its response selector can exercise success, API failures, invalid payloads, missing payloads, network failure, and timeout handling.
+The setting controls the default for every API executed by `ApiClient`. Login applies a credential-based override without exposing mock controls in the UI: username `mock` uses a local response and the password selects its scenario. For example, `mock` / `success` loads the successful response. Every other username calls the real login endpoint.
 
-On failure, the login screen remains visible and displays an error. On success, `LoginActivity` starts `WebViewActivity` and finishes itself. `WebViewActivity` initializes Cordova with `loadUrl(launchUrl)` and loads the bundled application.
+On failure, the login screen remains visible and displays an error. On success, `LoginActivity` saves the tokens in the in-memory `SessionStore`, starts `WebViewActivity`, and finishes itself. Authenticated native API requests obtain their bearer header from this store. `WebViewActivity` initializes Cordova with `loadUrl(launchUrl)` and loads the bundled application.
+
+## Session Inactivity
+
+`WebViewActivity` records touch activity and `SessionInactivityManager` uses elapsed realtime so wall-clock changes do not affect the policy. After one minute without interaction it displays a session-expiry warning. Selecting **Stay signed in** resets both timers. At two minutes it clears `SessionStore`, destroys the Cordova activity, and opens a fresh login screen. Time spent in the background counts as inactive and is evaluated when the app resumes.
 
 ## Login API Contract
 
-The real service sends:
+The real service sends the shared request envelope:
 
 ```json
 {
-  "username": "entered username",
-  "password": "entered password"
-}
-```
-
-Mock and real responses use the same shape:
-
-```json
-{
-  "success": true,
-  "message": "Login successful.",
+  "meta": {
+    "requestId": "client UUID",
+    "sentAt": "UTC timestamp",
+    "apiVersion": "1.0",
+    "channel": "MOBILE",
+    "locale": "en-SG"
+  },
   "data": {
-    "accessToken": "token",
-    "user": {
-      "id": "user-id",
-      "displayName": "User Name"
-    }
+    "username": "entered username",
+    "password": "entered password"
   }
 }
 ```
 
-The bundled login payloads are under `app/src/main/assets/mock-responses/login/`. See the project root `API.md` for the scenario list, complete contract, and process for adding another endpoint.
+Responses contain correlation metadata, `SUCCESS`/`FAILURE`/`PARTIAL` outcome, endpoint data, and a typed `errors` array. The bundled login payloads are under `app/src/main/assets/mock-responses/login/`. See the project root `API.md` for the authoritative contract, scenario list, and process for adding another endpoint.
 
 ## Logout
 
 The web application calls `NativeSession.logout()`. The shared JavaScript module invokes Cordova's `exec` API with the `NativeSession` service and `logout` action.
 
-The Android plugin implements `CordovaPlugin` and calls the `LogoutListener` contract exposed by `WebViewActivity`. The web activity starts a fresh `LoginActivity` and finishes, allowing `CordovaActivity.onDestroy()` to destroy the current web view and plugin session. A later successful login creates a new `WebViewActivity` and Cordova session.
+The Android plugin implements `CordovaPlugin` and calls the `LogoutListener` contract exposed by `WebViewActivity`. The web activity clears `SessionStore`, starts a fresh `LoginActivity`, and finishes, allowing `CordovaActivity.onDestroy()` to destroy the current web view and plugin session. A later successful login creates a new native and Cordova session.
 
 The activity transitions finish the previous screen, so Back never returns to splash, an authenticated web session, or a logged-out Cordova instance.
 
@@ -122,10 +122,10 @@ plugins/native-session/
 └── src/ios/NativeSession.m
 ```
 
-## Cordova Prepare Notes
+## Native Project Ownership
 
-The `platforms/android` directory is intentionally tracked because it contains custom native code.
+`platforms/android` is an authoritative source project. Its Gradle wrapper, native application code, Cordova runtime, and plugin assets are committed so a clean clone can build without preparation.
 
-Running `cordova prepare android` refreshes generated configuration, plugin registrations, and bundled web assets. Cordova also relocates the `CordovaActivity` subclass to the application package and recreates its default `MainActivity` manifest entry. The `scripts/after-prepare-android.js` hook restores `WebViewActivity` to `App/Web`, removes generated or stale application activity entries, and writes one canonical manifest declaration for each of the splash, login, and web activities.
+`npm run native:web-sync` updates only application web files and preserves Cordova runtime/plugin files. Android simulator and package scripts compile directly with `platforms/android/gradlew`; they do not run `cordova prepare`.
 
-Review changes to `AndroidManifest.xml`, `res/xml/config.xml`, `android.json`, `app/src/main/assets/www`, and generated plugin sources before committing.
+Preparation is reserved for plugin, `config.xml`, or platform migrations. Run `npm run cordova:prepare:android` from a clean migration branch. Cordova may relocate the `CordovaActivity` subclass and recreate its default manifest activity; `scripts/after-prepare-android.js` restores the custom web activity package and splash/login/web declarations. Review every generated change before committing.

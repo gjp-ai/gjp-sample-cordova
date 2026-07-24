@@ -16,8 +16,11 @@ final class AppFlowViewController: UIViewController {
         show(splashViewController)
     }
 
-    private func showLoginScreen() {
-        let loginViewController = LoginViewController(loginService: LoginService())
+    private func showLoginScreen(initialErrorMessage: String? = nil) {
+        let loginViewController = LoginViewController(
+            loginService: LoginService(),
+            initialErrorMessage: initialErrorMessage
+        )
         loginViewController.onLoginSuccess = { [weak self] in
             self?.showWebApp()
         }
@@ -26,8 +29,11 @@ final class AppFlowViewController: UIViewController {
 
     private func showWebApp() {
         let webViewController = WebViewController()
-        webViewController.onLogout = { [weak self] in
-            self?.showLoginScreen()
+        webViewController.onLogout = { [weak self] reason in
+            let message = reason == .inactivity
+                ? "Your session expired due to inactivity. Sign in again."
+                : nil
+            self?.showLoginScreen(initialErrorMessage: message)
         }
         show(webViewController)
     }

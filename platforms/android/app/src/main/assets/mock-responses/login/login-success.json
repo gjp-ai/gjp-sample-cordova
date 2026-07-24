@@ -1,11 +1,22 @@
 {
-  "success": true,
-  "message": "Login successful.",
+  "meta": {
+    "requestId": "00000000-0000-4000-8000-000000000001",
+    "responseId": "00000000-0000-4000-8000-000000000101",
+    "respondedAt": "2026-07-17T00:00:00.650Z",
+    "outcome": "SUCCESS"
+  },
   "data": {
-    "accessToken": "mock-access-token",
-    "user": {
-      "id": "demo-user",
-      "displayName": "Demo User"
+    "session": {
+      "accessToken": "mock-access-token",
+      "refreshToken": "mock-refresh-token",
+      "tokenType": "Bearer",
+      "expiresInSeconds": 900
+    },
+    "customer": {
+      "customerId": "customer-demo-001",
+      "displayName": "Demo User",
+      "lastLoginAt": "2026-07-16T08:30:00.000Z"
     }
-  }
+  },
+  "errors": []
 }

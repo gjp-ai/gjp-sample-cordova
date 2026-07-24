@@ -20,6 +20,7 @@ The app supports iOS 15.0 and later. The minimum version is configured by the iO
 - `App/Login/LoginViewController.swift` contains the native login form and login state handling.
 - `App/Configuration/AppSettings.swift` loads application-wide API settings.
 - `App/Network/` contains the shared request model and API client used by every native API.
+- `App/Session/` contains the in-memory token store and inactivity policy.
 - `App/Login/Services/LoginService.swift` contains login-specific request and response handling.
 - `App/Web/WebViewController.swift` owns and loads the Cordova web view.
 - `www/` contains the prepared web assets that Cordova loads after login.
@@ -44,15 +45,14 @@ After the splash delay, `onFinished` asks `AppFlowViewController` to show the lo
 
 The login form is built in code by `LoginViewController`.
 
-It contains:
+It contains only customer-facing login controls:
 
 - Username field
 - Password field
 - Error message label
 - Sign in button
-- Demo credential hint
 
-The login button calls `submitLogin()`, which delegates authentication through `LoginServicing`.
+The login button calls `submitLogin()`, which delegates authentication through `LoginService`.
 
 ## Login Service Configuration
 
@@ -60,7 +60,7 @@ The login button calls `submitLogin()`, which delegates authentication through `
 
 ```json
 {
-  "isMockMode": true,
+  "isMockMode": false,
   "apiBaseUrl": "https://api.example.com/v1"
 }
 ```
@@ -68,25 +68,9 @@ The login button calls `submitLogin()`, which delegates authentication through `
 - `isMockMode: true` makes the shared `APIClient` return the request's bundled JSON file without a network call.
 - `isMockMode: false` makes the shared `APIClient` send the request to `apiBaseUrl`.
 
-The setting applies to all native APIs. Replace the example base URL before disabling mock mode. The login page also provides a runtime mock-mode switch that overrides the startup setting for the current screen. When enabled, its response menu can exercise success, API failures, invalid payloads, missing payloads, network failure, and timeout handling using files under `Resources/MockResponses/Login/`.
+The setting applies to all native APIs. Login applies a credential-based override without exposing mock controls in the UI: username `mock` uses a local response and the password selects its scenario. For example, `mock` / `success` loads the successful response. Every other username calls the real login endpoint.
 
-Mock and real responses share this contract:
-
-```json
-{
-  "success": true,
-  "message": "Login successful.",
-  "data": {
-    "accessToken": "token",
-    "user": {
-      "id": "user-id",
-      "displayName": "User Name"
-    }
-  }
-}
-```
-
-`success == true` opens the Cordova web view. `success == false` keeps the user on the native login form and displays `message`. See the project root `API.md` for the complete request and response contract and instructions for adding mock payloads for other endpoints.
+Mock and real responses share the finance API envelope with correlation metadata, `SUCCESS`/`FAILURE`/`PARTIAL` outcome, endpoint data, and a typed `errors` array. `SUCCESS` opens the Cordova web view. Other outcomes keep the user on the native login form and display the first customer-safe error message. See the project root `API.md` for the authoritative request and response contract.
 
 ## Web App Handoff
 
@@ -100,22 +84,24 @@ On successful login:
 
 This keeps authentication in native code while leaving the post-login application experience in Cordova web code. `CDVLaunchScreen.storyboard` is still the required static iOS system launch screen, but it is not displayed again during the native-to-web handoff.
 
+Successful login saves the access and refresh tokens in the in-memory `SessionStore`. Authenticated native API requests obtain their bearer header from this store.
+
+## Session Inactivity
+
+`WebViewController` observes touches without cancelling WebView gestures. After one minute without interaction it displays a session-expiry warning. Selecting **Stay signed in** resets both timers. At two minutes it clears `SessionStore` and asks `AppFlowViewController` to replace the web controller with a fresh login controller. Time spent in the background counts as inactive and is evaluated when the app returns to the foreground.
+
 ## Logout Flow
 
 The web app displays an iOS-only `Log out` button after Cordova's `deviceready` event. The button calls `NativeSession.logout()`, which is provided by the local Cordova plugin in `plugins/native-session`.
 
-The plugin uses Cordova's `exec` API to invoke the iOS `NativeSession` class. The native plugin posts a logout notification, `WebViewController` calls its `onLogout` callback, and `AppFlowViewController` replaces the web controller with a new `LoginViewController`.
+The plugin uses Cordova's `exec` API to invoke the iOS `NativeSession` class. The native plugin posts a logout notification, `WebViewController` clears `SessionStore` and calls its `onLogout` callback, and `AppFlowViewController` replaces the web controller with a new `LoginViewController`.
 
 Keeping the JavaScript API in a Cordova plugin prevents the web application from depending directly on WebKit APIs. The plugin is installed as a local package through the `file:plugins/native-session` dependency in `package.json`.
 
-## Cordova Prepare Notes
+## Native Project Ownership
 
-The `platforms/ios` directory is intentionally tracked because it contains custom native code.
+`platforms/ios` is an authoritative source project. The Xcode workspace, local Cordova Swift packages, native application code, Cordova runtime, and plugin assets are committed so a clean clone can build without preparation.
 
-Be careful when running:
+`npm run native:web-sync` updates only application web files and preserves Cordova runtime/plugin files. Simulator runs use Cordova's `--noprepare` option; IPA generation invokes Xcode directly.
 
-```sh
-cordova prepare ios
-```
-
-Cordova can refresh generated platform files and web assets. After running prepare, review the native Swift files, `Main.storyboard`, and the Xcode project changes before committing.
+Preparation is reserved for plugin, `config.xml`, or platform migrations. Run `npm run cordova:prepare:ios` from a clean migration branch. There is no automatic iOS restoration hook, so review the Swift files, storyboards, resources, plugin registration, and Xcode project changes before committing.

@@ -1,5 +1,52 @@
 import Foundation
 
+struct APIRequestMetadata: Encodable {
+    let requestId = UUID().uuidString.lowercased()
+    let sentAt: String
+    let apiVersion = "1.0"
+    let channel = "MOBILE"
+    let locale = Locale.current.identifier.replacingOccurrences(of: "_", with: "-")
+
+    init(now: Date = Date()) {
+        sentAt = ISO8601DateFormatter.api.string(from: now)
+    }
+}
+
+private extension ISO8601DateFormatter {
+    static let api: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+}
+
+enum APIOutcome: String, Decodable {
+    case success = "SUCCESS"
+    case failure = "FAILURE"
+    case partial = "PARTIAL"
+}
+
+struct APIResponseMetadata: Decodable {
+    let requestId: String
+    let responseId: String
+    let respondedAt: String
+    let outcome: APIOutcome
+}
+
+struct APIErrorPayload: Decodable {
+    let code: String
+    let message: String
+    let field: String?
+    let retryable: Bool
+    let retryAfterSeconds: Int?
+}
+
+struct APIEnvelope<Payload: Decodable>: Decodable {
+    let meta: APIResponseMetadata
+    let data: Payload?
+    let errors: [APIErrorPayload]
+}
+
 struct APIRequest {
     let method: String
     let path: String
@@ -7,6 +54,8 @@ struct APIRequest {
     let mockResponseFile: String
     let mockStatusCode: Int
     let mockError: APIError?
+    let mockModeOverride: Bool?
+    let requiresAuthentication: Bool
 }
 
 struct APIResponse {

@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.ganjianping.sample.app.config.AppSettings;
+import com.ganjianping.sample.app.session.SessionStore;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -48,7 +49,10 @@ public final class ApiClient {
             return;
         }
         executor.submit(() -> {
-            ApiResponse response = mockMode
+            boolean shouldUseMock = request.mockModeOverride == null
+                ? mockMode
+                : request.mockModeOverride;
+            ApiResponse response = shouldUseMock
                 ? loadMockResponse(request)
                 : executeNetworkRequest(request);
             if (!closed && !Thread.currentThread().isInterrupted()) {
@@ -86,6 +90,13 @@ public final class ApiClient {
             connection.setConnectTimeout(timeout);
             connection.setReadTimeout(timeout);
             connection.setRequestProperty("Accept", "application/json");
+            if (request.requiresAuthentication) {
+                String authorization = SessionStore.getInstance().getAuthorizationHeader();
+                if (authorization == null) {
+                    return ApiResponse.failure("Your session has expired. Please sign in again.");
+                }
+                connection.setRequestProperty("Authorization", authorization);
+            }
 
             if (request.body != null) {
                 connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");

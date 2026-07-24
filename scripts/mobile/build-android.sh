@@ -27,7 +27,8 @@ case "$PACKAGE_TYPE" in
 esac
 
 cd "$PROJECT_ROOT"
-run_cordova prepare android
+require_command node
+node "$PROJECT_ROOT/scripts/mobile/sync-web.js"
 
 GRADLEW="$PROJECT_ROOT/platforms/android/gradlew"
 [[ -x "$GRADLEW" ]] || fail "Android Gradle wrapper was not found: $GRADLEW"

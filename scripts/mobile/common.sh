@@ -43,7 +43,7 @@ resolve_cordova() {
     fi
 
     CORDOVA_BIN="$(command -v cordova || true)"
-    [[ -n "$CORDOVA_BIN" ]] || fail "Cordova CLI was not found. Run: npm install -g cordova"
+    [[ -n "$CORDOVA_BIN" ]] || fail "Cordova CLI was not found. Run npm ci in the project root."
 }
 
 run_cordova() {

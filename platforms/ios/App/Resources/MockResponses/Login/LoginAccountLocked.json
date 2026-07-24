@@ -1,5 +1,17 @@
 {
-  "success": false,
-  "message": "This account is locked. Contact support to restore access.",
-  "data": null
+  "meta": {
+    "requestId": "00000000-0000-4000-8000-000000000004",
+    "responseId": "00000000-0000-4000-8000-000000000104",
+    "respondedAt": "2026-07-17T00:00:00.650Z",
+    "outcome": "FAILURE"
+  },
+  "data": null,
+  "errors": [
+    {
+      "code": "AUTH_ACCOUNT_LOCKED",
+      "message": "This account is locked. Contact support to restore access.",
+      "field": null,
+      "retryable": false
+    }
+  ]
 }

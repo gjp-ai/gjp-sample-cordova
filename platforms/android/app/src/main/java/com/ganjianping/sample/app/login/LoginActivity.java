@@ -6,12 +6,14 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.ganjianping.sample.app.login.services.LoginResult;
-import com.ganjianping.sample.app.login.services.LoginMockScenario;
 import com.ganjianping.sample.app.login.services.LoginService;
 import com.ganjianping.sample.app.network.ApiClient;
+import com.ganjianping.sample.app.session.SessionStore;
 import com.ganjianping.sample.app.web.WebViewActivity;
 
 public final class LoginActivity extends AppCompatActivity {
+    public static final String EXTRA_SESSION_EXPIRED = "sessionExpired";
+
     private LoginService loginService;
     private LoginView loginView;
 
@@ -22,7 +24,6 @@ public final class LoginActivity extends AppCompatActivity {
         loginView = new LoginView(this);
         try {
             loginService = new LoginService(new ApiClient(this));
-            loginView.setMockMode(loginService.isMockMode());
         } catch (Exception error) {
             loginView.showError("The application settings are invalid.");
         }
@@ -30,23 +31,18 @@ public final class LoginActivity extends AppCompatActivity {
             @Override
             public void onLoginRequested(
                 String username,
-                String password,
-                LoginMockScenario scenario
+                String password
             ) {
-                submitLogin(username, password, scenario);
-            }
-
-            @Override
-            public void onMockModeChanged(boolean enabled) {
-                if (loginService != null) {
-                    loginService.setMockMode(enabled);
-                }
+                submitLogin(username, password);
             }
         });
         setContentView(loginView);
+        if (getIntent().getBooleanExtra(EXTRA_SESSION_EXPIRED, false)) {
+            loginView.showError("Your session expired due to inactivity. Sign in again.");
+        }
     }
 
-    private void submitLogin(String username, String password, LoginMockScenario scenario) {
+    private void submitLogin(String username, String password) {
         LoginView currentLoginView = loginView;
         if (currentLoginView == null) {
             return;
@@ -61,7 +57,6 @@ public final class LoginActivity extends AppCompatActivity {
         loginService.login(
             username,
             password,
-            scenario,
             result -> handleLoginResult(currentLoginView, result)
         );
     }
@@ -72,6 +67,7 @@ public final class LoginActivity extends AppCompatActivity {
         }
 
         if (result.isSuccess()) {
+            SessionStore.getInstance().save(result);
             startActivity(new Intent(this, WebViewActivity.class));
             finish();
             return;

@@ -33,6 +33,9 @@
 		D10000012D40000900000001 /* LoginServerError.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000A00000001 /* LoginServerError.json */; };
 		D10000012D40000B00000001 /* LoginMalformed.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000C00000001 /* LoginMalformed.json */; };
 		D10000012D40000D00000001 /* LoginEmpty.json in Resources */ = {isa = PBXBuildFile; fileRef = D10000012D40000E00000001 /* LoginEmpty.json */; };
+		E10000012D50000100000001 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000012D50000200000001 /* SessionStore.swift */; };
+		E10000012D50000300000001 /* SessionInactivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000012D50000400000001 /* SessionInactivityController.swift */; };
+		E10000012D50000500000001 /* LoginMissing.json in Resources */ = {isa = PBXBuildFile; fileRef = E10000012D50000600000001 /* LoginMissing.json */; };
 		90D82ABD2CF19AEA001383CF /* CordovaPlugins in Frameworks */ = {isa = PBXBuildFile; productRef = 90D82ABC2CF19AEA001383CF /* CordovaPlugins */; };
 		EDB55B7E6EF44106A6734068 /* NativeSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 628AD60BAFBB4051967C556F /* NativeSession.m */; };
 		8FC3CCDF05124BD4843A4DE4 /* SplashIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = B86C644A75B84BAD93168383 /* SplashIcon.png */; };
@@ -84,6 +87,9 @@
 		D10000012D40000A00000001 /* LoginServerError.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginServerError.json; sourceTree = "<group>"; };
 		D10000012D40000C00000001 /* LoginMalformed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginMalformed.json; sourceTree = "<group>"; };
 		D10000012D40000E00000001 /* LoginEmpty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginEmpty.json; sourceTree = "<group>"; };
+		E10000012D50000200000001 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		E10000012D50000400000001 /* SessionInactivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionInactivityController.swift; sourceTree = "<group>"; };
+		E10000012D50000600000001 /* LoginMissing.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = MockResponses/Login/LoginMissing.json; sourceTree = "<group>"; };
 		90EB303B2C6DD83300CEEB2F /* build.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = build.xcconfig; path = cordova/build.xcconfig; sourceTree = SOURCE_ROOT; };
 		90EB303C2C6DD83300CEEB2F /* build-extras.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "build-extras.xcconfig"; path = "cordova/build-extras.xcconfig"; sourceTree = SOURCE_ROOT; };
 		90EB303F2C6DD87600CEEB2F /* build-debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = "build-debug.xcconfig"; path = "cordova/build-debug.xcconfig"; sourceTree = SOURCE_ROOT; };
@@ -121,6 +127,7 @@
 				D10000012D40000A00000001 /* LoginServerError.json */,
 				D10000012D40000C00000001 /* LoginMalformed.json */,
 				D10000012D40000E00000001 /* LoginEmpty.json */,
+				E10000012D50000600000001 /* LoginMissing.json */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -202,6 +209,15 @@
 			path = Web;
 			sourceTree = "<group>";
 		};
+		E10000012D50000700000001 /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				E10000012D50000200000001 /* SessionStore.swift */,
+				E10000012D50000400000001 /* SessionInactivityController.swift */,
+			);
+			path = Session;
+			sourceTree = "<group>";
+		};
 		C10000012D30000B00000001 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
@@ -250,6 +266,7 @@
 				C10000012D30000B00000001 /* Configuration */,
 				C10000012D30000C00000001 /* Network */,
 				A10000012D10000D00000001 /* Web */,
+				E10000012D50000700000001 /* Session */,
 				90BD9B7D2C06907E000DEBAB /* CDVLaunchScreen.storyboard */,
 				90BD9B782C06907D000DEBAB /* Main.storyboard */,
 				90BD9B7B2C06907E000DEBAB /* Assets.xcassets */,
@@ -351,6 +368,7 @@
 				D10000012D40000900000001 /* LoginServerError.json in Resources */,
 				D10000012D40000B00000001 /* LoginMalformed.json in Resources */,
 				D10000012D40000D00000001 /* LoginEmpty.json in Resources */,
+				E10000012D50000500000001 /* LoginMissing.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,6 +386,8 @@
 				C10000012D30000100000001 /* AppSettings.swift in Sources */,
 				C10000012D30000300000001 /* APIRequest.swift in Sources */,
 				C10000012D30000500000001 /* APIClient.swift in Sources */,
+				E10000012D50000100000001 /* SessionStore.swift in Sources */,
+				E10000012D50000300000001 /* SessionInactivityController.swift in Sources */,
 				A10000012D10000700000001 /* AppFlowViewController.swift in Sources */,
 				90CBB5282C06968500B805A2 /* AppDelegate.swift in Sources */,
 				90CBB52A2C06968500B805A2 /* SceneDelegate.swift in Sources */,

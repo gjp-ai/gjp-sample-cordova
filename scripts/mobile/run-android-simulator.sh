@@ -28,6 +28,7 @@ done
 require_command adb
 require_command emulator
 require_command apkanalyzer
+require_command node
 
 find_online_emulator() {
     local serial
@@ -67,7 +68,11 @@ stop_emulator() {
 }
 
 cd "$PROJECT_ROOT"
-run_cordova build android --debug
+node "$PROJECT_ROOT/scripts/mobile/sync-web.js"
+
+GRADLEW="$PROJECT_ROOT/platforms/android/gradlew"
+[[ -x "$GRADLEW" ]] || fail "Android Gradle wrapper was not found: $GRADLEW"
+"$GRADLEW" -p "$PROJECT_ROOT/platforms/android" :app:assembleDebug
 
 APK_PATH="$PROJECT_ROOT/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
 [[ -f "$APK_PATH" ]] || fail "Debug APK was not found: $APK_PATH"

@@ -1,5 +1,18 @@
 {
-  "success": false,
-  "message": "The login service is temporarily unavailable.",
-  "data": null
+  "meta": {
+    "requestId": "00000000-0000-4000-8000-000000000006",
+    "responseId": "00000000-0000-4000-8000-000000000106",
+    "respondedAt": "2026-07-17T00:00:00.650Z",
+    "outcome": "FAILURE"
+  },
+  "data": null,
+  "errors": [
+    {
+      "code": "SERVICE_TEMPORARILY_UNAVAILABLE",
+      "message": "The login service is temporarily unavailable.",
+      "field": null,
+      "retryable": true,
+      "retryAfterSeconds": 30
+    }
+  ]
 }

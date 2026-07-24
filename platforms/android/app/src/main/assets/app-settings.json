@@ -1,5 +1,5 @@
 {
-  "isMockMode": true,
+  "isMockMode": false,
   "apiBaseUrl": "https://api.example.com/v1",
   "requestTimeoutSeconds": 15,
   "mockResponseDelayMilliseconds": 650

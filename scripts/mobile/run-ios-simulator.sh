@@ -7,6 +7,8 @@ source "$SCRIPT_DIR/common.sh"
 
 [[ "$(uname -s)" == "Darwin" ]] || fail "The iOS simulator requires macOS."
 require_command xcodebuild
+require_command node
 
 cd "$PROJECT_ROOT"
-run_cordova run ios --simulator "$@"
+node "$PROJECT_ROOT/scripts/mobile/sync-web.js"
+run_cordova run ios --noprepare --simulator "$@"

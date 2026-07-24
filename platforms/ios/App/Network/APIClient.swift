@@ -4,13 +4,19 @@ final class APIClient {
     private let bundle: Bundle
     private let session: URLSession
     private let settings: AppSettings?
+    private let sessionStore: SessionStore
     private var mockMode: Bool
     private var tasks: [UUID: URLSessionDataTask] = [:]
     private var activeRequestIds = Set<UUID>()
 
-    init(bundle: Bundle = .main, session: URLSession = .shared) {
+    init(
+        bundle: Bundle = .main,
+        session: URLSession = .shared,
+        sessionStore: SessionStore = .shared
+    ) {
         self.bundle = bundle
         self.session = session
+        self.sessionStore = sessionStore
         settings = try? AppSettings.load(bundle: bundle)
         mockMode = settings?.isMockMode ?? false
     }
@@ -34,7 +40,8 @@ final class APIClient {
 
         let requestId = UUID()
         activeRequestIds.insert(requestId)
-        if mockMode {
+        let shouldUseMock = apiRequest.mockModeOverride ?? mockMode
+        if shouldUseMock {
             DispatchQueue.main.asyncAfter(
                 deadline: .now() + .milliseconds(max(settings.mockResponseDelayMilliseconds, 0))
             ) { [weak self] in
@@ -97,6 +104,12 @@ final class APIClient {
         )
         urlRequest.httpMethod = request.method
         urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+        if request.requiresAuthentication {
+            guard let authorization = sessionStore.authorizationHeader else {
+                return nil
+            }
+            urlRequest.setValue(authorization, forHTTPHeaderField: "Authorization")
+        }
         if let body = request.body {
             urlRequest.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
             urlRequest.httpBody = body

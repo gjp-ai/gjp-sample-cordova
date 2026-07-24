@@ -1,6 +1,16 @@
 import Foundation
 
-enum LoginMockScenario: String, CaseIterable {
+private struct LoginRequest: Encodable {
+    struct Credentials: Encodable {
+        let username: String
+        let password: String
+    }
+
+    let meta = APIRequestMetadata()
+    let data: Credentials
+}
+
+enum LoginMockScenario: String {
     case success
     case invalidCredentials
     case validationError
@@ -13,20 +23,21 @@ enum LoginMockScenario: String, CaseIterable {
     case networkError
     case timeout
 
-    var title: String {
-        switch self {
-        case .success: return "Success"
-        case .invalidCredentials: return "Invalid credentials"
-        case .validationError: return "Validation error"
-        case .accountLocked: return "Account locked"
-        case .rateLimited: return "Rate limited"
-        case .serverError: return "Server error"
-        case .malformedResponse: return "Malformed response"
-        case .emptyResponse: return "Empty response"
-        case .missingPayload: return "Missing payload"
-        case .networkError: return "Network error"
-        case .timeout: return "Request timeout"
-        }
+    static let mockUsername = "mock"
+
+    static func from(password: String) -> LoginMockScenario? {
+        let normalized = password
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+            .replacingOccurrences(of: "_", with: "-")
+        let scenarioName = normalized
+            .split(separator: "-")
+            .enumerated()
+            .map { index, component in
+                index == 0 ? String(component) : component.capitalized
+            }
+            .joined()
+        return LoginMockScenario(rawValue: scenarioName)
     }
 
     var responseFile: String {
@@ -75,18 +86,9 @@ final class LoginService {
         self.apiClient = apiClient
     }
 
-    var isMockMode: Bool {
-        apiClient.isMockMode
-    }
-
-    func setMockMode(_ enabled: Bool) {
-        apiClient.setMockMode(enabled)
-    }
-
     func login(
         username: String,
         password: String,
-        mockScenario: LoginMockScenario,
         completion: @escaping (Result<LoginSession, LoginError>) -> Void
     ) {
         guard !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -97,18 +99,30 @@ final class LoginService {
             completion(.failure(.validation("Enter your password.")))
             return
         }
+        let isMockLogin = username.trimmingCharacters(in: .whitespacesAndNewlines)
+            .caseInsensitiveCompare(LoginMockScenario.mockUsername) == .orderedSame
+        let mockScenario = isMockLogin
+            ? LoginMockScenario.from(password: password)
+            : .success
+        guard let mockScenario else {
+            completion(.failure(.validation(
+                "Unknown mock scenario. Use success or another documented scenario."
+            )))
+            return
+        }
         do {
-            let body = try JSONSerialization.data(withJSONObject: [
-                "username": username,
-                "password": password
-            ])
+            let body = try JSONEncoder().encode(LoginRequest(
+                data: .init(username: username, password: password)
+            ))
             apiClient.execute(APIRequest(
                 method: "POST",
                 path: "login",
                 body: body,
                 mockResponseFile: mockScenario.responseFile,
                 mockStatusCode: mockScenario.statusCode,
-                mockError: mockScenario.apiError
+                mockError: mockScenario.apiError,
+                mockModeOverride: isMockLogin,
+                requiresAuthentication: false
             )) { result in
                 switch result {
                 case .success(let response):
@@ -134,6 +148,9 @@ final class LoginService {
 
 struct LoginSession {
     let accessToken: String
+    let refreshToken: String
+    let tokenType: String
+    let expiresAt: Date
     let userId: String
     let displayName: String
 }
@@ -158,42 +175,58 @@ enum LoginError: LocalizedError {
     }
 }
 
-struct LoginResponse: Decodable {
-    struct ResponseData: Decodable {
-        struct User: Decodable {
-            let id: String?
-            let displayName: String?
-        }
-
-        let accessToken: String?
-        let user: User?
+private struct LoginResponseData: Decodable {
+    struct Session: Decodable {
+        let accessToken: String
+        let refreshToken: String
+        let tokenType: String
+        let expiresInSeconds: Int
     }
 
-    let success: Bool
-    let message: String?
-    let data: ResponseData?
-
-    func result() -> Result<LoginSession, LoginError> {
-        guard success else {
-            return .failure(.service(message ?? "Unable to sign in. Please try again."))
-        }
-
-        guard let data, let accessToken = data.accessToken, !accessToken.isEmpty, data.user != nil else {
-            return .failure(.invalidResponse)
-        }
-
-        return .success(LoginSession(
-            accessToken: accessToken,
-            userId: data.user?.id ?? "",
-            displayName: data.user?.displayName ?? ""
-        ))
+    struct Customer: Decodable {
+        let customerId: String
+        let displayName: String?
+        let lastLoginAt: String?
     }
+
+    let session: Session
+    let customer: Customer
 }
 
 enum LoginResponseParser {
     static func parse(_ data: Data) -> Result<LoginSession, LoginError> {
         do {
-            return try JSONDecoder().decode(LoginResponse.self, from: data).result()
+            let envelope = try JSONDecoder().decode(
+                APIEnvelope<LoginResponseData>.self,
+                from: data
+            )
+            guard envelope.meta.outcome == .success else {
+                guard !envelope.errors.isEmpty else {
+                    return .failure(.invalidResponse)
+                }
+                return .failure(.service(
+                    envelope.errors[0].message
+                ))
+            }
+            guard let payload = envelope.data,
+                  envelope.errors.isEmpty,
+                  !payload.session.accessToken.isEmpty,
+                  !payload.session.refreshToken.isEmpty,
+                  payload.session.tokenType == "Bearer",
+                  payload.session.expiresInSeconds > 0,
+                  !payload.customer.customerId.isEmpty else {
+                return .failure(.invalidResponse)
+            }
+            return .success(LoginSession(
+                accessToken: payload.session.accessToken,
+                refreshToken: payload.session.refreshToken,
+                tokenType: payload.session.tokenType,
+                expiresAt: Date().addingTimeInterval(
+                    TimeInterval(payload.session.expiresInSeconds)
+                ),
+                userId: payload.customer.customerId,
+                displayName: payload.customer.displayName ?? ""
+            ))
         } catch {
             return .failure(.invalidResponse)
         }

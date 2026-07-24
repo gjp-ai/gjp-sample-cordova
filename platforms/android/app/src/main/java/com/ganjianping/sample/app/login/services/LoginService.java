@@ -19,7 +19,6 @@ public final class LoginService {
     public void login(
         String username,
         String password,
-        LoginMockScenario mockScenario,
         Callback callback
     ) {
         if (username.trim().isEmpty()) {
@@ -30,17 +29,33 @@ public final class LoginService {
             callback.onComplete(LoginResult.failure("Enter your password."));
             return;
         }
+        boolean isMockLogin = LoginMockScenario.MOCK_USERNAME.equalsIgnoreCase(username.trim());
+        LoginMockScenario mockScenario = isMockLogin
+            ? LoginMockScenario.fromPassword(password)
+            : LoginMockScenario.SUCCESS;
+        if (isMockLogin && mockScenario == null) {
+            callback.onComplete(LoginResult.failure(
+                "Unknown mock scenario. Use success or another documented scenario."
+            ));
+            return;
+        }
         try {
+            JSONObject credentials = new JSONObject();
+            credentials.put("username", username);
+            credentials.put("password", password);
+
             JSONObject body = new JSONObject();
-            body.put("username", username);
-            body.put("password", password);
+            body.put("meta", ApiRequest.createMetadata());
+            body.put("data", credentials);
             ApiRequest request = new ApiRequest(
                 "POST",
                 "/login",
                 body.toString(),
                 mockScenario.responseAsset,
                 mockScenario.statusCode,
-                mockScenario.errorMessage
+                mockScenario.errorMessage,
+                isMockLogin,
+                false
             );
             apiClient.execute(request, response -> {
                 if (response.hasTransportError()) {
@@ -67,11 +82,4 @@ public final class LoginService {
         apiClient.close();
     }
 
-    public boolean isMockMode() {
-        return apiClient.isMockMode();
-    }
-
-    public void setMockMode(boolean enabled) {
-        apiClient.setMockMode(enabled);
-    }
 }
