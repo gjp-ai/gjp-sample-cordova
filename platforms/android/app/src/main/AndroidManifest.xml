@@ -13,6 +13,8 @@
             </intent-filter>
         </activity>
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation" android:exported="false" android:name="com.ganjianping.sample.app.login.LoginActivity" android:theme="@style/Theme.Cordova.App.DayNight" android:windowSoftInputMode="adjustResize" />
+        <activity android:exported="false" android:name="com.ganjianping.sample.app.login.MoreActivity" android:theme="@style/Theme.Cordova.App.DayNight" />
+        <activity android:exported="false" android:name="com.ganjianping.sample.app.login.NotificationActivity" android:theme="@style/Theme.Cordova.App.DayNight" />
         <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation" android:exported="false" android:launchMode="singleTop" android:name="com.ganjianping.sample.app.web.WebViewActivity" android:theme="@style/Theme.Cordova.App.DayNight" android:windowSoftInputMode="adjustResize" />
     </application>
     <queries>

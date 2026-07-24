@@ -34,6 +34,9 @@ app/src/main/java/com/ganjianping/sample/
     ├── login/
     │   ├── LoginActivity.java
     │   ├── LoginView.java
+    │   ├── PanoramicBackgroundView.java
+    │   ├── NotificationActivity.java
+    │   ├── MoreActivity.java
     │   └── services/
     │       ├── LoginResult.java
     │       └── LoginService.java
@@ -60,7 +63,11 @@ Android displays the system launch screen first. Its background is configured as
 
 ## Login
 
-`LoginView` collects the username and password and delegates authentication to the single `LoginService`. The service creates the login request and executes it through the application-wide `ApiClient`.
+`LoginView` displays the Singapore panorama from `res/drawable-nodpi/login_background.jpg`. `PanoramicBackgroundView` scales it to fill the screen and continuously pans the viewport from left to right on a slow 36-second loop. A gradient preserves contrast, while the username, password, error message, and sign-in button remain in a glass-style bottom panel.
+
+The top-left notification button opens `NotificationActivity`. The top-right More button opens `MoreActivity`, which uses a three-column grid for Device info, About app, Security, Privacy, Help, and Contact.
+
+The login controls delegate authentication to the single `LoginService`. The service creates the login request and executes it through the application-wide `ApiClient`.
 
 The project-wide API default is in `app/src/main/assets/app-settings.json`:
 

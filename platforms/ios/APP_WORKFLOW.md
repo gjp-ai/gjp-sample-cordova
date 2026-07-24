@@ -17,7 +17,9 @@ The app supports iOS 15.0 and later. The minimum version is configured by the iO
 
 - `App/Flow/AppFlowViewController.swift` coordinates the splash, login, and web child controllers.
 - `App/Splash/SplashViewController.swift` contains the native splash screen.
-- `App/Login/LoginViewController.swift` contains the native login form and login state handling.
+- `App/Login/LoginViewController.swift` contains the animated native login form and login state handling.
+- `App/Login/LoginAuxiliaryViewControllers.swift` contains the Notifications and three-column More screens.
+- `App/Resources/LoginBackground.jpg` is the panoramic login background.
 - `App/Configuration/AppSettings.swift` loads application-wide API settings.
 - `App/Network/` contains the shared request model and API client used by every native API.
 - `App/Session/` contains the in-memory token store and inactivity policy.
@@ -43,14 +45,18 @@ After the splash delay, `onFinished` asks `AppFlowViewController` to show the lo
 
 ## Native Login Screen
 
-The login form is built in code by `LoginViewController`.
+The login form is built in code by `LoginViewController`. It scales `LoginBackground.jpg` to fill the display and continuously pans from left to right on a slow 36-second loop. A gradient preserves contrast, while a keyboard-aware glass panel keeps the login controls anchored to the bottom.
 
-It contains only customer-facing login controls:
+It contains these customer-facing controls:
 
+- Notifications button at the top left
+- More button at the top right
 - Username field
 - Password field
 - Error message label
 - Sign in button
+
+Notifications opens `NotificationViewController`. More opens `MoreViewController`, whose rows each contain three icon buttons for Device info, About app, Security, Privacy, Help, and Contact.
 
 The login button calls `submitLogin()`, which delegates authentication through `LoginService`.
 

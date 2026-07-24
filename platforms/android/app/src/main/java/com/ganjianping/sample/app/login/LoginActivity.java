@@ -29,6 +29,16 @@ public final class LoginActivity extends AppCompatActivity {
         }
         loginView.setListener(new LoginView.Listener() {
             @Override
+            public void onNotificationsRequested() {
+                startActivity(new Intent(LoginActivity.this, NotificationActivity.class));
+            }
+
+            @Override
+            public void onMoreRequested() {
+                startActivity(new Intent(LoginActivity.this, MoreActivity.class));
+            }
+
+            @Override
             public void onLoginRequested(
                 String username,
                 String password
